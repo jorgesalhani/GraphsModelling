@@ -47,12 +47,12 @@ void graph_print_aux(NODE* node) {
 void graph_delete_aux(NODE** node) {
     if (node != NULL && node_exists_(*node)) {
         graph_delete_aux(&((*node)->node));
+        
+        item_delete(&((*node)->item));
+        free((*node));
+        *node = NULL;
+        node = NULL;
     }
-
-    item_delete(&((*node)->item));
-    free((*node));
-    *node = NULL;
-    node = NULL;
 }
 
 
@@ -76,6 +76,7 @@ bool graph_add_node(GRAPH* graph, ITEM* item) {
     NODE* new_node = (NODE*) malloc(sizeof(NODE));
     if (!node_exists_(new_node)) return false;
     new_node->item = item;
+    new_node->node = NULL;
 
     if (graph_is_empty_(graph)) {
         graph->node = new_node;
