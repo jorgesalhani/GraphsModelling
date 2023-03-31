@@ -9,7 +9,8 @@ typedef struct node_ NODE;
 
 struct node_ {
     ITEM* item;
-    NODE* node;
+    NODE* next;
+    NODE* connection;
 };
 
 struct graph_ {
@@ -30,29 +31,44 @@ bool graph_is_empty_(GRAPH* graph) {
     return false;
 }
 
-NODE* graph_get_previous_node_aux(NODE* node, ITEM* item) {
-    if (!node_exists_(node->node)) return node;
-    if (item_get_key(node->node->item) >= item_get_key(item)) return node;
 
-    return graph_get_previous_node_aux(node->node, item);
+NODE* graph_get_previous_node_aux(NODE* node, ITEM* item) {
+    if (!node_exists_(node->next)) return node;
+    if (item_get_key(node->next->item) >= item_get_key(item)) return node;
+
+    return graph_get_previous_node_aux(node->next, item);
 }
 
 void graph_print_aux(NODE* node) {
     if (node_exists_(node)) {
         printf("%d -> ", item_get_key(node->item));
-        graph_print_aux(node->node);
+        graph_print_aux(node->next);
     }
 }
 
 void graph_delete_aux(NODE** node) {
     if (node != NULL && node_exists_(*node)) {
-        graph_delete_aux(&((*node)->node));
+        graph_delete_aux(&((*node)->next));
         
         item_delete(&((*node)->item));
         free((*node));
         *node = NULL;
         node = NULL;
     }
+}
+
+bool node_already_in_graph_(NODE* node, ITEM* item) {
+    if (!node_exists_(node)) return false;
+    if (item_get_key(node->item) == item_get_key(item)) {
+        printf("%d", item_get_key(node->item));
+        printf(" Exists\n"); 
+        return true;
+    }
+    node_already_in_graph_(node->next, item);
+}
+
+bool graph_add_link(NODE* node, ITEM* item_from, ITEM* item_to) {
+    
 }
 
 
@@ -70,26 +86,28 @@ bool graph_exists(GRAPH* graph) {
     return graph != NULL ? true : false;
 }
 
-bool graph_add_node(GRAPH* graph, ITEM* item) {
-    if (!graph_exists(graph) || !item_exists(item)) return false;
+bool graph_add_node(GRAPH* graph, ITEM* item_from, ITEM* item_to) {
+    if (!graph_exists(graph) || !item_exists(item_from)) return false;
+
+    if (node_already_in_graph_(graph->node, item_from)) {
+        graph_add_link(graph->node, item_from, item_to);
+        return true;
+    }
     
     NODE* new_node = (NODE*) malloc(sizeof(NODE));
     if (!node_exists_(new_node)) return false;
-    new_node->item = item;
-    new_node->node = NULL;
+    new_node->item = item_from;
+    new_node->next = NULL;
+    new_node->connection = NULL;
 
     if (graph_is_empty_(graph)) {
         graph->node = new_node;
     } else {
-        NODE* previous_node = graph_get_previous_node_aux(graph->node, item);
-        new_node->node = previous_node->node;
-        previous_node->node = new_node;
+        NODE* previous_node = graph_get_previous_node_aux(graph->node, item_from);
+        new_node->next = previous_node->next;
+        previous_node->next = new_node;
     }
 
-    return true;
-}
-
-bool graph_add_link(GRAPH* graph, ITEM* item_from, ITEM* item_to) {
     return true;
 }
 
