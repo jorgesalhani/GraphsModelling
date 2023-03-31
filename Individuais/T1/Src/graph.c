@@ -31,8 +31,8 @@ bool graph_is_empty_(GRAPH* graph) {
 }
 
 NODE* graph_get_previous_node_aux(NODE* node, ITEM* item) {
-    if (!node_exists_(node)) return node;
-    if (item_get_key(node->item) >= item_get_key(item)) return node;
+    if (!node_exists_(node->node)) return node;
+    if (item_get_key(node->node->item) >= item_get_key(item)) return node;
 
     return graph_get_previous_node_aux(node->node, item);
 }
@@ -112,4 +112,5 @@ void graph_print(GRAPH* graph) {
     if (graph_exists(graph) && !graph_is_empty_(graph)) {
         graph_print_aux(graph->node);
     }
+    printf("\n");
 }
