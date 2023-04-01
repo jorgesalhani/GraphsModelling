@@ -13,7 +13,7 @@ int main(void) {
     
     GRAPH* graph = graph_create();
     graph_add_node(graph, item1, item2);
-    graph_add_node(graph, item2, item3);
+    graph_add_node(graph, item1, item3);
     graph_add_node(graph, item3, item4);
     graph_add_node(graph, item3, item5);
     graph_add_node(graph, item4, item6);
