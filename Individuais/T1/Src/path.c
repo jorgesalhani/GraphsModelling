@@ -36,7 +36,7 @@ void path_delete_aux(PATH* path) {
     ITEM* item = path_unstack(path);
     if (!item_exists(item)) return;
 
-    item_delete(&item);
+    // item_delete(&item);
     path_delete_aux(path);
 }
 
@@ -74,6 +74,16 @@ bool path_add(PATH* path, ITEM* item) {
 
     path->total_layers++;
     return true;
+}
+
+ITEM* path_get_top(PATH* path) {
+    if (!path_exists(path) || path_is_empty(path)) return NULL;
+    return path->top_layer->item;
+}
+
+int path_get_total_stack(PATH* path) {
+    if (!path_exists(path)) return -1;
+    return path->total_layers;
 }
 
 ITEM* path_unstack(PATH* path) {

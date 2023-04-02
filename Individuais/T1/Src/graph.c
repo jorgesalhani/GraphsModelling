@@ -77,7 +77,7 @@ void graph_print_aux(NODE* node, bool with_availability) {
 void graph_delete_connections_aux(NODE** node) {
     if (node != NULL && node_exists_(*node)) {
         graph_delete_connections_aux(&((*node)->connection));
-        
+        if (item_exists((*node)->item)) item_delete(&((*node)->item));
         free((*node));
         *node = NULL;
         node = NULL;
@@ -87,7 +87,7 @@ void graph_delete_connections_aux(NODE** node) {
 void graph_delete_nodes_aux(NODE** node) {
     if (node != NULL && node_exists_(*node)) {
         graph_delete_nodes_aux(&((*node)->next));
-        item_delete(&((*node)->item));
+        if (item_exists((*node)->item)) item_delete(&((*node)->item));
     }
     graph_delete_connections_aux(node);
 }
@@ -107,10 +107,13 @@ NODE* node_already_connected_(NODE* node, ITEM* item) {
 bool graph_add_link(NODE* node_from, ITEM* item_to) {
     NODE* node_to = node_already_connected_(node_from, item_to);
     if (!node_exists_(node_from) || node_exists_(node_to)) return false;
+
+    ITEM* new_item = item_create(item_get_key(item_to));
+    if (!item_exists(new_item)) return false;
     
     NODE* new_node = (NODE*) malloc(sizeof(NODE));
     if (!node_exists_(new_node)) return false;
-    new_node->item = item_to;
+    new_node->item = new_item;
     new_node->next = NULL;
     new_node->connection = NULL;
 
@@ -144,8 +147,20 @@ NODE* graph_add_node_aux(GRAPH* graph, ITEM* item_from) {
     return new_node;
 }
 
-bool find_eulerian_path(PATH* path, NODE* node) {
+NODE* graph_move_to_next_connection(NODE* node) {
+    if (!node_exists_(node) || !node_exists_(node->connection)) return NULL;
+
+    return node->connection;
+}
+
+bool graph_find_eulerian_path(PATH* path, NODE* node) {
+    NODE* node_to = graph_move_to_next_connection(node);
+    item_set_availability(node_to->item, false);
+
+    // if (item_get_key(node_to->item) == item_get_key(path_get_top(path))) 
     
+    node->visited = true;
+    return true;
 }
 
 
@@ -164,9 +179,10 @@ bool graph_exists(GRAPH* graph) {
 }
 
 bool graph_add_nodes(GRAPH* graph, int key_from, int key_to) {
+    if (!graph_exists(graph)) return false;
+
     ITEM* item_from = item_create(key_from);
     ITEM* item_to = item_create(key_to);
-    if (!graph_exists(graph)) return false;
     
     NODE* node_from = node_already_in_graph_(graph->node, item_from);
     if (node_exists_(node_from)) {
@@ -211,9 +227,16 @@ void graph_print(GRAPH* graph, bool with_availability) {
 }
 
 bool graph_is_eulerian(GRAPH* graph) {
+    if (!graph_exists(graph) || graph_is_empty_(graph)) return false;
+
     PATH* path = path_create();
-    if (!path_exists(path) || !graph_exists(graph)) return false;
-    bool path_found = find_eulerian_path(path, graph->node);
+    if (!path_exists(path)) return false;
+
+    path_add(path, graph->node->item);
+    graph->node->visited = true;
+    bool path_found = graph_find_eulerian_path(path, graph->node);
+
+    path_print(path);
 
     path_delete(&path);
 }

@@ -31,6 +31,11 @@ bool item_is_available(ITEM* item) {
     return item->available;
 }
 
+void item_set_availability(ITEM* item, bool availability) {
+    if (!item_exists(item)) return;
+    item->available = availability;
+}
+
 bool item_delete(ITEM** item) {
     if (item != NULL && !item_exists(*item)) return false;
     free(*item);

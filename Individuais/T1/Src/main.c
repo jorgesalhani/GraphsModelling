@@ -27,8 +27,11 @@ int main(void) {
     graph_add_nodes(graph, 3, 4);
 
     graph_print(graph, true);
+    printf("\n");
 
     graph_is_eulerian(graph);
+
+    graph_print(graph, true);
 
     graph_delete(&graph);
 

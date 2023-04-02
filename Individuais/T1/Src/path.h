@@ -8,6 +8,8 @@
 
     PATH* path_create();
     bool path_add(PATH* path, ITEM* item);
+    ITEM* path_get_top(PATH* path);
+    int path_get_total_stack(PATH* path);
     bool path_exists(PATH* path);
     bool path_is_empty(PATH* path);
     ITEM* path_unstack(PATH* path);
