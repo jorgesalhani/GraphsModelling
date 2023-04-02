@@ -4,26 +4,28 @@
 #include "graph.h"
 
 int main(void) {
-    ITEM* item1 = item_create(1);
-    ITEM* item2 = item_create(13);
-    ITEM* item3 = item_create(5);
-    ITEM* item4 = item_create(3);
-    ITEM* item5 = item_create(20);
-    ITEM* item6 = item_create(16);
-    
+    int v, a;
+    int node_from, node_to;
+
+    scanf("%d %d ", &v, &a);
     GRAPH* graph = graph_create();
-    graph_add_node(graph, item1, item2);
-    graph_add_node(graph, item1, item3);
-    graph_add_node(graph, item3, item4);
-    graph_add_node(graph, item3, item5);
-    graph_add_node(graph, item4, item6);
-    graph_add_node(graph, item5, item1);
-    graph_add_node(graph, item5, item2);
-    graph_add_node(graph, item5, item6);
-    graph_add_node(graph, item6, item2);
+    int i = 0;
+    while (i < a) {
+        scanf("%d %d ", &node_from, &node_to);
+        graph_add_node(graph, node_from, node_to);
+        i++;
+    }
+
+    // GRAPH* graph = graph_create();  
+    // graph_add_node(graph, 0, 1);
+    // graph_add_node(graph, 0, 3);
+    // graph_add_node(graph, 1, 2);
+    // graph_add_node(graph, 1, 3);
+    // graph_add_node(graph, 1, 4);
+    // graph_add_node(graph, 2, 3);
+    // graph_add_node(graph, 3, 4);
 
     graph_print(graph);
-
     graph_delete(&graph);
 
     return 0;

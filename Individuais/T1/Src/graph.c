@@ -146,12 +146,26 @@ bool graph_exists(GRAPH* graph) {
     return graph != NULL ? true : false;
 }
 
-bool graph_add_node(GRAPH* graph, ITEM* item_from, ITEM* item_to) {
-    if (!graph_exists(graph) || !item_exists(item_from)) return false;
+bool graph_add_node(GRAPH* graph, int key_from, int key_to) {
+    ITEM* item_from = item_create(key_from);
+    ITEM* item_to = item_create(key_to);
+    if (!graph_exists(graph)) return false;
+    
+    NODE* node_from = node_already_in_graph_(graph->node, item_from);
+    if (node_exists_(node_from)) {
+        item_delete(&item_from);
+    } else {
+        node_from = graph_add_node_aux(graph, item_from);
+    }
 
-    NODE* node_from = graph_add_node_aux(graph, item_from);
-    NODE* node_to = graph_add_node_aux(graph, item_to);
-    graph_add_link(node_from, item_to);
+    NODE* node_to = node_already_in_graph_(graph->node, item_to);
+    if (node_exists_(node_to)) {
+        item_delete(&item_to);
+    } else {
+        node_to = graph_add_node_aux(graph, item_to);
+    }
+
+    graph_add_link(node_from, node_to->item);
 
     return true;
 }
