@@ -131,6 +131,10 @@ NODE* graph_add_node_aux(GRAPH* graph, ITEM* item_from) {
     return new_node;
 }
 
+bool find_eulerian_path(PATH* path, NODE* node) {
+    
+}
+
 
 // Main operations
 // ===============
@@ -166,6 +170,7 @@ bool graph_add_nodes(GRAPH* graph, int key_from, int key_to) {
     }
 
     graph_add_link(node_from, node_to->item);
+    graph_add_link(node_to, node_from->item);
 
     return true;
 }
@@ -190,4 +195,12 @@ void graph_print(GRAPH* graph) {
         graph_print_aux(graph->node);
     }
     printf("\n");
+}
+
+bool graph_is_eulerian(GRAPH* graph) {
+    PATH* path = path_create();
+    if (!path_exists(path) || !graph_exists(graph)) return false;
+    bool path_found = find_eulerian_path(path, graph->node);
+
+    path_delete(&path);
 }
