@@ -1,5 +1,5 @@
-all: item.o graph.o main.o #path.o
-	gcc -g item.o graph.o main.o -o exec -std=c99 -Wall; make clean
+all: item.o graph.o main.o path.o
+	gcc -g item.o graph.o path.o main.o -o exec -std=c99 -Wall; make clean
 
 item.o:
 	gcc -g -c item.c -o item.o
@@ -17,4 +17,4 @@ clean:
 	rm *.o
 
 run:
-	valgrind ./exec < ../TestCases/2.in
+	valgrind ./exec < ../TestCases/1.in

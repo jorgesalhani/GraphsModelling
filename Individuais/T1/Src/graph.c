@@ -146,7 +146,7 @@ bool graph_exists(GRAPH* graph) {
     return graph != NULL ? true : false;
 }
 
-bool graph_add_node(GRAPH* graph, int key_from, int key_to) {
+bool graph_add_nodes(GRAPH* graph, int key_from, int key_to) {
     ITEM* item_from = item_create(key_from);
     ITEM* item_to = item_create(key_to);
     if (!graph_exists(graph)) return false;

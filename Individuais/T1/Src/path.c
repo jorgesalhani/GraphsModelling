@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "path.h"
+
+// Data structure
+// ==============
+
+typedef struct layer_ LAYER;
+
+struct layer_ {
+    LAYER* down_layer;
+    ITEM* item;
+};
+
+struct path_ {
+    int total_layers;
+    LAYER* top_layer;
+};
+
+// Util operations
+// ===============
+
+bool path_exists_(PATH* path) {
+    return path != NULL ? true : false;
+}
+
+bool layer_exists_(LAYER* layer) {
+    return layer != NULL ? true : false;
+}
+
+bool path_is_empty_(PATH* path) {
+    return path->total_layers == 0 ? true : false;
+}
+
+void path_delete_aux(PATH* path) {
+    ITEM* item = path_unstack(path);
+    if (!item_exists(item)) return;
+
+    item_delete(&item);
+    path_delete_aux(path);
+}
+
+void print_path_aux(LAYER* layer) {
+    if (!layer_exists_(layer) || !item_exists(layer->item)) return;
+    printf("%d -> ", item_get_key(layer->item));
+    print_path_aux(layer->down_layer);
+}
+
+// Main operations
+// ===============
+
+PATH* path_create() {
+    PATH* path = (PATH*) malloc(sizeof(PATH));
+    if (!path_exists_(path)) return NULL;
+    path->total_layers = 0;
+    path->top_layer = NULL;
+    return path;
+}
+
+bool path_add(PATH* path, ITEM* item) {
+    if (!path_exists_(path) || !item_exists(item)) return false;
+    
+    LAYER* new_layer = (LAYER*) malloc(sizeof(LAYER));
+    if (!layer_exists_(new_layer)) return false;
+
+    new_layer->item = item;
+    new_layer->down_layer = NULL;
+    if (path_is_empty_(path)) {
+        path->top_layer = new_layer;
+    } else {
+        new_layer->down_layer = path->top_layer;
+        path->top_layer = new_layer;
+    }
+
+    path->total_layers++;
+    return true;
+}
+
+ITEM* path_unstack(PATH* path) {
+    if (!path_exists_(path) || path_is_empty_(path)) return NULL;
+
+    ITEM* item = path->top_layer->item;
+    LAYER* layer_to_delete = path->top_layer;
+    path->top_layer = path->top_layer->down_layer;
+
+    free(layer_to_delete);
+    layer_to_delete = NULL;
+
+    path->total_layers--;
+    return item;
+}
+
+bool path_delete(PATH** path) {
+    if (path == NULL || !path_exists_(*path)) return false;
+    if (!path_is_empty_(*path)) {
+        path_delete_aux(*path);
+    }
+
+    free(*path);
+    *path = NULL;
+    path = NULL;
+    return true;
+}
+
+void path_print(PATH* path) {
+    if (!path_exists_(path) || path_is_empty_(path)) return;
+    print_path_aux(path->top_layer);
+    printf("\n");
+}
