@@ -8,6 +8,7 @@
 typedef struct node_ NODE;
 
 struct node_ {
+    bool visited;
     ITEM* item;
     NODE* next;
     NODE* connection;
@@ -46,19 +47,30 @@ NODE* graph_get_previous_connection_aux(NODE* node, ITEM* item) {
     return graph_get_previous_connection_aux(node->connection, item);
 }
 
-void print_connections(NODE* node) {
+void print_connections(NODE* node, bool with_availability) {
     if (node_exists_(node)) {
-        printf("%d,", item_get_key(node->item));
-        print_connections(node->connection);
+        if (with_availability) {
+            char available = item_is_available(node->item) ? 'a' : 'u';
+            printf("{%d:%c},", item_get_key(node->item), available);
+        } else {
+            printf("%d,", item_get_key(node->item));
+        }
+        print_connections(node->connection, with_availability);
     }
 }
 
-void graph_print_aux(NODE* node) {
+void graph_print_aux(NODE* node, bool with_availability) {
     if (node_exists_(node)) {
-        printf("%d: [", item_get_key(node->item));
-        print_connections(node->connection);
+        if (with_availability) {
+            char visited = node->visited ? 'y' : 'n';
+            printf("{%d:%c}: [", item_get_key(node->item), visited);
+        } else {
+            printf("%d: [", item_get_key(node->item));
+        }
+        
+        print_connections(node->connection, with_availability);
         printf("]\n");
-        graph_print_aux(node->next);
+        graph_print_aux(node->next, with_availability);
     }
 }
 
@@ -119,6 +131,7 @@ NODE* graph_add_node_aux(GRAPH* graph, ITEM* item_from) {
     new_node->item = item_from;
     new_node->next = NULL;
     new_node->connection = NULL;
+    new_node->visited = false;
 
     if (graph_is_empty_(graph)) {
         graph->node = new_node;
@@ -190,9 +203,9 @@ bool graph_delete(GRAPH** graph) {
     return true;
 }
 
-void graph_print(GRAPH* graph) {
+void graph_print(GRAPH* graph, bool with_availability) {
     if (graph_exists(graph) && !graph_is_empty_(graph)) {
-        graph_print_aux(graph->node);
+        graph_print_aux(graph->node, with_availability);
     }
     printf("\n");
 }

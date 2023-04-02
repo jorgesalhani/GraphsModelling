@@ -26,7 +26,7 @@ int main(void) {
     graph_add_nodes(graph, 2, 3);
     graph_add_nodes(graph, 3, 4);
 
-    graph_print(graph);
+    graph_print(graph, true);
 
     graph_is_eulerian(graph);
 
