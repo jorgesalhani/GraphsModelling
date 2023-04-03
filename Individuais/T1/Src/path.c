@@ -42,8 +42,8 @@ void path_delete_aux(PATH* path) {
 
 void print_path_aux(LAYER* layer) {
     if (!layer_exists_(layer) || !item_exists(layer->item)) return;
-    printf("%d -> ", item_get_key(layer->item));
     print_path_aux(layer->down_layer);
+    printf("%d ", item_get_key(layer->item));
 }
 
 // Main operations

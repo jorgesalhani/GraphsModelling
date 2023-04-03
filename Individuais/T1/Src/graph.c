@@ -15,6 +15,8 @@ struct node_ {
 };
 
 struct graph_ {
+    int degree_node;
+    int degree_edge;
     NODE* node;
 };
 
@@ -92,16 +94,16 @@ void graph_delete_nodes_aux(NODE** node) {
     graph_delete_connections_aux(node);
 }
 
-NODE* node_already_in_graph_(NODE* node, ITEM* item) {
-    if (!node_exists_(node)) return NULL;
-    if (item_get_key(node->item) == item_get_key(item)) return node;
-    node_already_in_graph_(node->next, item);
+NODE* node_already_in_graph_(NODE* node_head, ITEM* item) {
+    if (!node_exists_(node_head)) return NULL;
+    if (item_get_key(node_head->item) == item_get_key(item)) return node_head;
+    node_already_in_graph_(node_head->next, item);
 }
 
-NODE* node_already_connected_(NODE* node, ITEM* item) {
-    if (!node_exists_(node)) return NULL;
-    if (item_get_key(node->item) == item_get_key(item)) return node;
-    node_already_connected_(node->connection, item);
+NODE* node_already_connected_(NODE* node_from, ITEM* item) {
+    if (!node_exists_(node_from)) return NULL;
+    if (item_get_key(node_from->item) == item_get_key(item)) return node_from;
+    node_already_connected_(node_from->connection, item);
 }
 
 bool graph_add_link(NODE* node_from, ITEM* item_to) {
@@ -147,30 +149,75 @@ NODE* graph_add_node_aux(GRAPH* graph, ITEM* item_from) {
     return new_node;
 }
 
-NODE* graph_move_to_next_connection(NODE* node) {
-    if (!node_exists_(node) || !node_exists_(node->connection)) return NULL;
-
-    return node->connection;
+NODE* graph_get_next_available_connection(NODE* node_from) {
+    if (!node_exists_(node_from)) return NULL;
+    if (item_is_available(node_from->item)) return node_from;
+    graph_get_next_available_connection(node_from->connection);
 }
 
-bool graph_find_eulerian_path(PATH* path, NODE* node) {
-    NODE* node_to = graph_move_to_next_connection(node);
+bool graph_find_eulerian_path(GRAPH* graph, PATH* path, NODE* node_from, NODE* node_to) {
+    if (graph->degree_edge + 1 == path_get_total_stack(path) && item_get_key(path_get_top(path)) == item_get_key(graph->node->item)) {
+        return true;
+    }
+
+    if (!node_exists_(node_to) || path_get_total_stack(path) == graph->degree_edge + 1) return false;
+    if (!node_exists_(node_to->connection) && !item_is_available(node_to->item)) return false;
+
+    path_add(path, node_from->item);
+
     item_set_availability(node_to->item, false);
 
-    // if (item_get_key(node_to->item) == item_get_key(path_get_top(path))) 
+    NODE* node_with_double_edge = node_already_in_graph_(graph->node, node_to->item);
+    NODE* node_double_edge = node_already_connected_(node_with_double_edge, node_from->item);
+    item_set_availability(node_double_edge->item, false);
+
+    NODE* next_available = graph_get_next_available_connection(node_with_double_edge->connection);
+    if (!node_exists_(next_available)) {
+        path_add(path, node_to->item);
+        return false;
+    }
+
+    // if (item_is_available(node_with_double_edge->connection->item)) {
+    //     graph_find_eulerian_path(graph, path, node_with_double_edge, node_with_double_edge->connection);
+    // } else {
+    graph_find_eulerian_path(graph, path, node_with_double_edge, next_available);
+
+    if (graph->degree_edge + 1 == path_get_total_stack(path) && item_get_key(path_get_top(path)) == item_get_key(graph->node->item)) {
+        return true;
+    }
+    // }
+
+    // if (item_is_available(node_to->item)) {
+    //     path_add(path, node_from->item);
+    //     item_set_availability(node_to->item, false);
+    //     NODE* node_double_edge = node_already_connected_(node_with_double_edge, node_from->item);
+    //     item_set_availability(node_double_edge->item, false);
+    //     graph_find_eulerian_path(graph, path, node_to, node_with_double_edge->connection);
+    // } else {
+    //     graph_find_eulerian_path(graph, path, node_from, node_to->connection);
+    // }
+
+    ITEM* item_to = path_unstack(path);
+    ITEM* item_from = path_unstack(path);
     
-    node->visited = true;
-    return true;
+    NODE* next_node_from = node_already_in_graph_(graph->node, item_from);
+    NODE* next_node_to = node_already_connected_(next_node_from, item_to);
+
+    item_set_availability(next_node_to->item, true);
+
+    graph_find_eulerian_path(graph, path, next_node_from, next_node_to->connection);
 }
 
 
 // Main operations
 // ===============
 
-GRAPH* graph_create() {
+GRAPH* graph_create(int degree_node, int degree_edge) {
     GRAPH* graph = (GRAPH*) malloc(sizeof(GRAPH));
     if (!graph_exists(graph)) return NULL;
     graph->node = NULL;
+    graph->degree_node = degree_node;
+    graph->degree_edge = degree_edge;
     return graph;
 }
 
@@ -201,6 +248,7 @@ bool graph_add_nodes(GRAPH* graph, int key_from, int key_to) {
     graph_add_link(node_from, node_to->item);
     graph_add_link(node_to, node_from->item);
 
+
     return true;
 }
 
@@ -219,6 +267,16 @@ bool graph_delete(GRAPH** graph) {
     return true;
 }
 
+int graph_get_node_degree(GRAPH* graph) {
+    if (!graph_exists(graph)) return -1;
+    return graph->degree_node;
+}
+
+int graph_get_edge_degree(GRAPH* graph) {
+    if (!graph_exists(graph)) return -1;
+    return graph->degree_edge;
+}
+
 void graph_print(GRAPH* graph, bool with_availability) {
     if (graph_exists(graph) && !graph_is_empty_(graph)) {
         graph_print_aux(graph->node, with_availability);
@@ -232,11 +290,13 @@ bool graph_is_eulerian(GRAPH* graph) {
     PATH* path = path_create();
     if (!path_exists(path)) return false;
 
-    path_add(path, graph->node->item);
-    graph->node->visited = true;
-    bool path_found = graph_find_eulerian_path(path, graph->node);
+    bool path_found = graph_find_eulerian_path(graph, path, graph->node, graph->node->connection);
+
+    graph_print(graph, true);
+    printf("\n");
 
     path_print(path);
+    printf("\n");
 
     path_delete(&path);
 }

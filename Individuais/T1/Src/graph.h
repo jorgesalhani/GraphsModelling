@@ -6,9 +6,11 @@
 
     typedef struct graph_ GRAPH;
 
-    GRAPH* graph_create();
+    GRAPH* graph_create(int degree_node, int degree_edge);
     bool graph_exists(GRAPH* graph);
     bool graph_add_nodes(GRAPH* graph, int key_from, int key_to);
+    int graph_get_node_degree(GRAPH* graph);
+    int graph_get_edge_degree(GRAPH* graph);
     bool graph_delete(GRAPH** graph);
     void graph_print(GRAPH* graph, bool with_availability);
 

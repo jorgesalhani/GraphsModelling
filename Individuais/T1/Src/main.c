@@ -8,23 +8,25 @@ int main(void) {
     int v, a;
     int node_from, node_to;
 
-    // scanf("%d %d ", &v, &a);
-    // GRAPH* graph = graph_create();
-    // int i = 0;
-    // while (i < a) {
-    //     scanf("%d %d ", &node_from, &node_to);
-    //     graph_add_nodes(graph, node_from, node_to);
-    //     i++;
-    // }
+    scanf("%d %d ", &v, &a);
+    GRAPH* graph = graph_create(v, a);
+    int i = 0;
+    while (i < a) {
+        scanf("%d %d ", &node_from, &node_to);
+        graph_add_nodes(graph, node_from, node_to);
+        i++;
+    }
 
-    GRAPH* graph = graph_create();  
-    graph_add_nodes(graph, 0, 1);
-    graph_add_nodes(graph, 0, 3);
-    graph_add_nodes(graph, 1, 2);
-    graph_add_nodes(graph, 1, 3);
-    graph_add_nodes(graph, 1, 4);
-    graph_add_nodes(graph, 2, 3);
-    graph_add_nodes(graph, 3, 4);
+    // v = 5;
+    // a = 7;
+    // GRAPH* graph = graph_create(v, a);  
+    // graph_add_nodes(graph, 0, 1);
+    // graph_add_nodes(graph, 0, 3);
+    // graph_add_nodes(graph, 1, 2);
+    // graph_add_nodes(graph, 1, 3);
+    // graph_add_nodes(graph, 1, 4);
+    // graph_add_nodes(graph, 2, 3);
+    // graph_add_nodes(graph, 3, 4);
 
     graph_print(graph, true);
     printf("\n");
