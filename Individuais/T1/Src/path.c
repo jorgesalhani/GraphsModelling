@@ -36,7 +36,6 @@ void path_delete_aux(PATH* path) {
     ITEM* item = path_unstack(path);
     if (!item_exists(item)) return;
 
-    // item_delete(&item);
     path_delete_aux(path);
 }
 

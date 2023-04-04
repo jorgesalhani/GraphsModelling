@@ -4,37 +4,41 @@
 #include "graph.h"
 #include "path.h"
 
+#define MAX_FILENAME 50
+#define MAX_LENGTH_LINE_IN_FILE 20
+
+FILE* open_file(char* filename) {
+    FILE* file_graph = fopen(filename, "r");
+    if (file_graph == NULL) {
+        perror(filename);
+        return NULL;
+    }
+    return file_graph;
+}
+
 int main(void) {
     int v, a;
     int node_from, node_to;
 
-    scanf("%d %d ", &v, &a);
+    char filename[MAX_FILENAME];
+    scanf("%s", filename);
+
+    FILE* file_open = open_file(filename);
+    if (file_open == NULL) return -1;
+    
+    fscanf(file_open, "%d ", &v);
+    fscanf(file_open, "%d ", &a);
     GRAPH* graph = graph_create(v, a);
-    int i = 0;
-    while (i < a) {
-        scanf("%d %d ", &node_from, &node_to);
+    
+    while (!feof(file_open)) {
+        fscanf(file_open, "%d", &node_from);
+        fscanf(file_open, "%d", &node_to);
         graph_add_nodes(graph, node_from, node_to);
-        i++;
     }
 
-    // v = 5;
-    // a = 7;
-    // GRAPH* graph = graph_create(v, a);  
-    // graph_add_nodes(graph, 0, 1);
-    // graph_add_nodes(graph, 0, 3);
-    // graph_add_nodes(graph, 1, 2);
-    // graph_add_nodes(graph, 1, 3);
-    // graph_add_nodes(graph, 1, 4);
-    // graph_add_nodes(graph, 2, 3);
-    // graph_add_nodes(graph, 3, 4);
-
-    graph_print(graph, true);
-    printf("\n");
+    fclose(file_open);
 
     graph_is_eulerian(graph);
-
-    graph_print(graph, true);
-
     graph_delete(&graph);
 
     return 0;

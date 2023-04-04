@@ -197,6 +197,7 @@ bool graph_find_eulerian_path(GRAPH* graph, PATH* path, NODE* node_from, NODE* n
     //     graph_find_eulerian_path(graph, path, node_from, node_to->connection);
     // }
 
+    if (path_get_total_stack(path) < 2) return false;
     ITEM* item_to = path_unstack(path);
     ITEM* item_from = path_unstack(path);
     
@@ -290,13 +291,16 @@ bool graph_is_eulerian(GRAPH* graph) {
     PATH* path = path_create();
     if (!path_exists(path)) return false;
 
+    // graph_print(graph, false);
+
     bool path_found = graph_find_eulerian_path(graph, path, graph->node, graph->node->connection);
 
-    graph_print(graph, true);
-    printf("\n");
-
-    path_print(path);
-    printf("\n");
+    if (path_found){
+        printf("Sim\n");
+        path_print(path);
+    } else {
+        printf("Não\n");
+    }
 
     path_delete(&path);
 }
