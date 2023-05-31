@@ -17,4 +17,4 @@ clean:
 	rm *.o
 
 run:
-	(echo ../TestCases/1.in) | valgrind ./exec
+	(echo ../TestCases/2.in) | valgrind ./exec
