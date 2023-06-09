@@ -19,12 +19,12 @@ ITEM* item_create(int key) {
     if (!item_exists(item)) return NULL;
     item->key = key;
     item->available = true;
-    item->visited_order = -1;
+    item->visited_order = INFINITY;
     return item;
 }
 
 int item_get_visited_order(ITEM* item) {
-    if (!item_exists(item)) return -1;
+    if (!item_exists(item)) return INFINITY;
     return item->visited_order;
 }
 

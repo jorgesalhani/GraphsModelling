@@ -9,6 +9,7 @@ typedef struct node_ NODE;
 
 struct node_ {
     bool visited;
+    bool in_scc;
     ITEM* item;
     NODE* next;
     NODE* connection;
@@ -101,6 +102,12 @@ NODE* node_already_in_graph_(NODE* node_head, ITEM* item) {
     node_already_in_graph_(node_head->next, item);
 }
 
+NODE* node_detached_(NODE* node_head) {
+    if (!node_exists_(node_head)) return NULL;
+    if (!node_head->visited) return node_head;
+    node_detached_(node_head->next);
+}
+
 NODE* node_already_connected_(NODE* node_from, ITEM* item) {
     if (!node_exists_(node_from)) return NULL;
     if (item_get_key(node_from->item) == item_get_key(item)) return node_from;
@@ -138,6 +145,7 @@ NODE* graph_add_node_aux(GRAPH* graph, ITEM* item_from) {
     new_node->next = NULL;
     new_node->connection = NULL;
     new_node->visited = false;
+    new_node->in_scc = false;
 
     if (graph_is_empty_(graph)) {
         graph->node = new_node;
@@ -307,24 +315,85 @@ bool graph_is_eulerian(GRAPH* graph) {
     path_delete(&path);
 }
 
+bool update_visited_order(NODE* node, int* visited_order) {
+    if (!node_exists_(node)) return false;
+    int vist_ord = *visited_order;
+    vist_ord++;
+    *visited_order = vist_ord;
+    item_set_visited_order(node->item, *visited_order);
+    return true;
+}
+
+int scc_get_low_w(GRAPH* graph, NODE* base_node, NODE* connected, int low) {
+    if (!graph_exists(graph) || !node_exists_(base_node) || !node_exists_(connected)) return low;
+    NODE* node = node_already_in_graph_(graph->node, connected->item);
+    if (low > item_get_visited_order(node->item) && !node->in_scc) {
+        scc_get_low_w(graph, base_node, connected->connection, item_get_visited_order(node->item));
+    } else {
+        scc_get_low_w(graph, base_node, connected->connection, low);
+    }
+}
+
+bool unstack_scc(GRAPH* graph, PATH* path, int low_w) {
+    if (!graph_exists(graph) || !path_exists(path)) return false;
+    if (path_is_empty(path)) return false;
+
+
+
+    ITEM* item_top = path_get_top(path);
+    NODE* node = node_already_in_graph_(graph->node, item_top);
+    NODE* connect_available = graph_get_next_available_connection(node->connection);
+    if (node_exists_(connect_available)) return false;
+
+    item_top = path_unstack(path);
+    int low_v = item_get_visited_order(item_top);
+    int new_low_w = scc_get_low_w(graph, node, node->connection, low_v);
+    if (low_w > new_low_w) low_v = new_low_w;
+    else low_v = low_w;
+
+    item_print(item_top);
+    if (low_v == item_get_visited_order(item_top)) printf("---\n");
+    node->in_scc = true;
+    unstack_scc(graph, path, low_v);
+
+
+}
+
 bool graph_strong_connected_components(GRAPH* graph, PATH* path, NODE* node_from, NODE* node_to, int* visited_order) {
     if (!node_exists_(node_from) || !node_exists_(node_to)) return false;
     
     NODE* next_step = graph_get_next_available_connection(node_from->connection);
-    if (!node_exists_(next_step)) return false;
+    if (!node_exists_(next_step)) {
+        return false;
+    }
+
+    NODE* current_node_from = node_already_in_graph_(graph->node, node_from->item);
     
     NODE* next_node_from = node_already_in_graph_(graph->node, next_step->item);
     if (!node_exists_(next_node_from)) return false;
 
-    int visit_ord = *visited_order;
-    visit_ord++;
-    *visited_order = visit_ord;
     item_set_availability(next_step->item, false);
-    if (item_get_visited_order(next_step->item) == -1) item_set_visited_order(next_step->item, visit_ord);
-    path_add(path, next_step->item);
+    
+    if (!next_node_from->visited) {
+        path_add(path, next_node_from->item);
+        update_visited_order(next_node_from, visited_order);
+    }
+    next_node_from->visited = true;
+    
+    graph_strong_connected_components(graph, path, next_node_from, next_node_from->connection, visited_order);    
 
-    graph_strong_connected_components(graph, path, next_node_from, next_node_from->connection, visited_order);
     graph_strong_connected_components(graph, path, node_from, next_step, visited_order);
+
+    if (path_get_total_stack(path) != graph->degree_node) {
+        unstack_scc(graph, path, INFINITY);
+        NODE* node_detached = node_detached_(graph->node);
+        if (!node_exists_(node_detached)) return true;
+        
+        path_add(path, node_detached->item);
+        update_visited_order(node_detached, visited_order);
+        node_detached->visited = true;
+        graph_strong_connected_components(graph, path, node_detached, next_step, visited_order);
+    }
     
 }
 
@@ -335,6 +404,11 @@ bool graph_print_strong_connected_components(GRAPH* graph) {
     if (!path_exists(path)) return false;
 
     int visited_order = 0;
+
+    path_add(path, graph->node->item);
+    item_set_visited_order(graph->node->item, visited_order);
+    graph->node->visited = true;
+    
     bool sccs = graph_strong_connected_components(graph, path, graph->node, graph->node->connection, &visited_order);
     path_print(path, true);
     path_delete(&path);

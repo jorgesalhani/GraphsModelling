@@ -43,7 +43,9 @@ void print_path_aux(LAYER* layer, bool with_metadata) {
     if (!layer_exists_(layer) || !item_exists(layer->item)) return;
     print_path_aux(layer->down_layer, with_metadata);
     if (with_metadata) {
-        printf("%d (%d) -- ", item_get_key(layer->item), item_get_visited_order(layer->item));
+        printf("%d (%d, ); ", 
+        item_get_key(layer->item), 
+        item_get_visited_order(layer->item));
     } else {
         printf("%d ", item_get_key(layer->item));
     }

@@ -3,6 +3,8 @@
 
     #include <stdbool.h>
 
+    #define INFINITY 42000
+
     typedef struct item_ ITEM;
 
     ITEM* item_create(int key);
