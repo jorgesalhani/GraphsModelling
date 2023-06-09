@@ -1,24 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "pkg/graph/graph.h"
 #include "pkg/item/item.h"
-#include "pkg/stack/stack.h"
+#include "pkg/graph/graph.h"
+#include "pkg/path/path.h"
 
-int main() {
-  ITEM* item0 = item_create(0);
-  ITEM* item1 = item_create(1);
-  ITEM* item2 = item_create(2);
-  ITEM* item3 = item_create(3);
+int main(void) {
+    int v, a;
+    int node_from, node_to;
+    
+    scanf("%d ", &v);
+    scanf("%d ", &a);
+    GRAPH* graph = graph_create(v, a, true);
+    
+    int line_i = 0;
+    while (line_i < a) {
+        scanf("%d", &node_from);
+        scanf("%d", &node_to);
+        graph_add_nodes(graph, node_from, node_to);
+        line_i++;
+    }
 
-  STACK* stack = stack_create();
-  stack_add(stack, item0);
-  stack_add(stack, item2);
-  stack_add(stack, item3);
-  stack_add(stack, item1);
+    graph_print(graph, true);
+    graph_print_strong_connected_components(graph);
+    graph_delete(&graph);
 
-  stack_print(stack);
-
-  stack_delete(&stack);
-
-  return 0;
+    return 0;
 }
