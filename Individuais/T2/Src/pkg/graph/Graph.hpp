@@ -23,14 +23,15 @@
     private:
       int total_nodes_;
       int total_edges_;
-      int index_;
+      int timestamp_;
       int total_scc_;
 
       std::vector<Item*> adjacency_list_;
       std::stack<Item*> stack_;
       std::vector<std::vector<int>> sccomponents_;
 
-      void scc_tarjan_alg_aux(Item* item);
+      void scc_tarjan_alg_aux_(Item* item);
+      void update_scc_vector_(Item* item);
   };
 
 #endif

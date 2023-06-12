@@ -18,4 +18,4 @@ clean:
 	rm *.o
 
 run:
-	valgrind ./exec 
+	./exec 

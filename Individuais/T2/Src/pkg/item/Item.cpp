@@ -2,7 +2,7 @@
 
 Item :: Item(int key) {
   key_ = key;
-  index_ = -1;
+  timestamp_ = -1;
   available_ = false;
   on_stack_ = false;
   low_v_ = 0;
@@ -10,9 +10,9 @@ Item :: Item(int key) {
 
 int Item :: get_key() { return key_ ; }
 
-int Item :: get_index() { return index_ ; }
+int Item :: get_timestamp() { return timestamp_ ; }
 
-void Item :: set_index(int index) { index_ = index ; }
+void Item :: set_timestamp(int timestamp) { timestamp_ = timestamp ; }
 
 int Item :: get_low_v() { return low_v_ ; }
 

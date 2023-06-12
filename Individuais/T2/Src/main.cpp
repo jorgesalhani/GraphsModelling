@@ -1,3 +1,10 @@
+/**
+ * @author Jorge Augusto Salgado Salhani - 8927418
+ * @brief T2 - Grafos
+ *        Determinar componentes fortemente conexas
+ *        Algoritmo de Tarjan
+*/
+
 #include <iostream>
 #include "pkg/graph/Graph.hpp"
 #include "pkg/item/Item.hpp"
