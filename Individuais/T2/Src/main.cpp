@@ -18,9 +18,10 @@ int main() {
     graph.add_edge(from, to);
   }
     
-  graph.print();
-  std::cout << "\n";
+  // graph.print();
+  // std::cout << "\n";
 
   graph.scc_tarjan_alg();
+  graph.scc_print();
   return 0;
 }

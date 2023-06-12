@@ -6,6 +6,7 @@ Graph :: Graph(int nodes, int edges) {
   total_nodes_ = nodes;
   total_edges_ = edges;
   index_ = 0;
+  total_scc_ = 0;
   for (int i = 0; i < total_nodes_; i++) {
     Item* item = new Item(i);
     adjacency_list_.emplace_back(item);
@@ -44,7 +45,7 @@ void Graph :: scc_tarjan_alg_aux(Item* v) {
   stack_.push(v);
   v->set_on_stack(true);
   
-  for (auto w : v->get_connections()) {
+  for (Item* w : v->get_connections()) {
     if (w->get_index() == -1) {
       scc_tarjan_alg_aux(w);
       v->set_low_v(std::min(v->get_low_v(), w->get_low_v()));
@@ -56,21 +57,36 @@ void Graph :: scc_tarjan_alg_aux(Item* v) {
   }
 
   if (v->get_low_v() == v->get_index()) {
-    for (;;) {
-      auto w = stack_.top();
-      cout << w->parse_string() << " ";
+    vector<int> scc;
+    while (true) {
+      Item* w = stack_.top();
+      scc.push_back(w->get_key());
       stack_.pop();
       w->set_on_stack(false);
       if (w == v) break;
     }
-    cout << endl;
+    std::sort(scc.begin(), scc.end());
+    sccomponents_.push_back(scc);
+    total_scc_++;
   } 
 }
 
 void Graph :: scc_tarjan_alg() {
-  for (auto& v : adjacency_list_) {
+  for (Item*& v : adjacency_list_) {
     if (v->get_index() == -1) {
       scc_tarjan_alg_aux(v);
     }
+  }
+
+  std::sort(sccomponents_.begin(), sccomponents_.end());
+}
+
+void Graph :: scc_print() {
+  cout << total_scc_ << endl;
+  for (vector<int> v : sccomponents_) {
+    for (int v_id : v) {
+      cout << v_id << " ";
+    }
+    cout << endl;
   }
 }
