@@ -1,22 +1,21 @@
-FILES_O = main.o graph.o path.o item.o
+FILES_O = main.o graph.o item.o
+CC = g++
+C_FLAGS = -g -Wall -std=c++11
 
 all: $(FILES_O)
-	gcc -g $(FILES_O) -std=c99 -Wall -o exec; make clean;
+	${CC} $(FILES_O) ${C_FLAGS} -o exec; make clean;
 
 main.o:
-	gcc -g -c main.c -o main.o
+	${CC} ${C_FLAGS} -c main.cpp -o main.o
 
 graph.o:
-	gcc -g -c pkg/graph/graph.c -o graph.o
-
-path.o:
-	gcc -g -c pkg/path/path.c -o path.o
+	${CC} ${C_FLAGS} -c pkg/graph/Graph.cpp -o graph.o
 
 item.o:
-	gcc -g -c pkg/item/item.c -o item.o
+	${CC} ${C_FLAGS} -c pkg/item/Item.cpp -o item.o
 
 clean:
 	rm *.o
 
 run:
-	valgrind ./exec < ../TestCases/in/4.in
+	valgrind ./exec 
